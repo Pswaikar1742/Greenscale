@@ -1,0 +1,14 @@
+# GreenScale Python Dependencies
+# Shared between app.py and worker.py
+
+# Redis client
+redis>=4.5.0
+
+# OpenAI API
+openai>=1.0.0
+
+# Streamlit for frontend
+streamlit>=1.28.0
+
+# Environment variables
+python-dotenv>=1.0.0

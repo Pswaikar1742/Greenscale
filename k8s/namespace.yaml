@@ -1,0 +1,11 @@
+# GreenScale Namespace
+# Owner: P (Platform Engineer)
+# As per INSTRUCTIONS.md: Kubernetes Namespace is 'greenscale-system'
+
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: greenscale-system
+  labels:
+    app: greenscale
+    environment: development
