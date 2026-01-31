@@ -4,6 +4,9 @@
 # UI Framework - Streamlit dashboard for user interaction
 streamlit
 
+# Data Visualization - Plotly for gauge charts
+plotly
+
 # Queue Connector - Redis client for job queue management
 redis
 
