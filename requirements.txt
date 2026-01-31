@@ -14,7 +14,7 @@ redis
 python-dotenv
 
 # Data Validation & Settings Management (optional but recommended)
-pydantic
+#pydantic
 
 # HTTP Client - General purpose requests library
 requests
