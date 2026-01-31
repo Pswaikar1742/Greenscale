@@ -7,6 +7,8 @@ When KEDA scales the Deployment to replicas: 1, this worker wakes up and begins 
 
 import os
 import time
+import json
+import uuid
 import redis
 import requests
 from dotenv import load_dotenv
