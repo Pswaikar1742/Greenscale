@@ -53,7 +53,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Update the theme toggle function with a professional color palette
+# Update the theme toggle function to include background color changes for light and dark modes
 def set_theme():
     if 'theme' not in st.session_state:
         st.session_state['theme'] = 'dark'  # Default theme is dark
@@ -62,13 +62,13 @@ def set_theme():
     if st.sidebar.button("🌙" if st.session_state['theme'] == 'light' else "☀️"):
         st.session_state['theme'] = 'light' if st.session_state['theme'] == 'dark' else 'dark'
 
-    # Apply theme-specific styles with a professional color palette
+    # Apply theme-specific styles, including background colors
     if st.session_state['theme'] == 'dark':
         st.markdown(
             """
             <style>
             body {
-                background-color: #121212;
+                background: linear-gradient(135deg, #0f2027, #203a43, #2c5364);
                 color: #e0e0e0;
                 font-family: 'Arial', sans-serif;
             }
@@ -112,7 +112,7 @@ def set_theme():
             """
             <style>
             body {
-                background-color: #f9f9f9;
+                background: linear-gradient(135deg, #ffffff, #e8f5e9, #c8e6c9);
                 color: #333333;
                 font-family: 'Arial', sans-serif;
             }
