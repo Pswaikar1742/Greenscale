@@ -53,7 +53,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Add a toggle for light and dark mode
+# Update the theme toggle function with a professional color palette
 def set_theme():
     if 'theme' not in st.session_state:
         st.session_state['theme'] = 'dark'  # Default theme is dark
@@ -62,30 +62,46 @@ def set_theme():
     if st.sidebar.button("🌙" if st.session_state['theme'] == 'light' else "☀️"):
         st.session_state['theme'] = 'light' if st.session_state['theme'] == 'dark' else 'dark'
 
-    # Apply theme-specific styles
+    # Apply theme-specific styles with a professional color palette
     if st.session_state['theme'] == 'dark':
         st.markdown(
             """
             <style>
             body {
-                background-color: #1e1e1e;
-                color: #d4d4d4;
+                background-color: #121212;
+                color: #e0e0e0;
+                font-family: 'Arial', sans-serif;
             }
             .stButton>button {
-                background-color: #2e7d32;
+                background-color: #4caf50;
                 color: white;
-                border-radius: 5px;
+                border-radius: 8px;
                 font-size: 16px;
+                padding: 10px 20px;
+                border: none;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.2);
             }
             .stButton>button:hover {
-                background-color: #1b5e20;
+                background-color: #388e3c;
                 color: #ffffff;
             }
             .stMetric {
-                background-color: #2b2b2b;
-                border-radius: 10px;
+                background-color: #1e1e1e;
+                border-radius: 12px;
+                padding: 15px;
+                color: #a5d6a7;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.3);
+            }
+            .stTextInput>div>div>input {
+                background-color: #2e2e2e;
+                color: #e0e0e0;
+                border: 1px solid #4caf50;
+                border-radius: 5px;
                 padding: 10px;
-                color: #d4d4d4;
+            }
+            .stTextInput>div>div>input:focus {
+                border-color: #81c784;
+                outline: none;
             }
             </style>
             """,
@@ -96,24 +112,40 @@ def set_theme():
             """
             <style>
             body {
-                background-color: #ffffff;
-                color: #000000;
+                background-color: #f9f9f9;
+                color: #333333;
+                font-family: 'Arial', sans-serif;
             }
             .stButton>button {
-                background-color: #4caf50;
+                background-color: #81c784;
                 color: white;
-                border-radius: 5px;
+                border-radius: 8px;
                 font-size: 16px;
+                padding: 10px 20px;
+                border: none;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
             }
             .stButton>button:hover {
-                background-color: #388e3c;
+                background-color: #66bb6a;
                 color: #ffffff;
             }
             .stMetric {
-                background-color: #f0f0f0;
-                border-radius: 10px;
+                background-color: #ffffff;
+                border-radius: 12px;
+                padding: 15px;
+                color: #388e3c;
+                box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+            }
+            .stTextInput>div>div>input {
+                background-color: #ffffff;
+                color: #333333;
+                border: 1px solid #81c784;
+                border-radius: 5px;
                 padding: 10px;
-                color: #000000;
+            }
+            .stTextInput>div>div>input:focus {
+                border-color: #4caf50;
+                outline: none;
             }
             </style>
             """,
