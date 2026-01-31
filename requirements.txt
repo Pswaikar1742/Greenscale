@@ -1,0 +1,20 @@
+# GreenScale Application Layer Dependencies
+# Deployed across both frontend (app.py) and backend (worker.py)
+
+# UI Framework - Streamlit dashboard for user interaction
+streamlit
+
+# Queue Connector - Redis client for job queue management
+redis
+
+# AI SDK - OpenAI API for LLM inference
+openai
+
+# Secrets Manager - Load environment variables from .env
+python-dotenv
+
+# Data Validation & Settings Management (optional but recommended)
+pydantic
+
+# HTTP Client - General purpose requests library
+requests
