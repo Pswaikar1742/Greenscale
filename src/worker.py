@@ -10,9 +10,11 @@ import time
 import redis
 import requests
 import json  # Import json to parse the incoming job_content
+import uuid
 from dotenv import load_dotenv
 
 # Task 1: Load environment variables from .env file
+# As per INSTRUCTIONS.md, secrets are managed via .env
 load_dotenv()
 
 # Load configuration from environment variables
@@ -22,6 +24,7 @@ REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")  # Default to Kubernetes R
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
 
 # Initialize Redis client
+# As per INSTRUCTIONS.md, worker pulls jobs from the 'jobs' list in Redis
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
 print(f"[Worker] Initialized successfully.")
@@ -29,7 +32,10 @@ print(f"[Worker] Redis: {REDIS_HOST}:{REDIS_PORT}")
 print(f"[Worker] Using Neysa Llama 3.3 endpoint: {NEYSA_API_URL}")
 print(f"[Worker] Listening for jobs on 'jobs' list...")
 
+
 # Task 4: Main processing loop
+# As per INSTRUCTIONS.md, worker uses RPOP to pull jobs from Redis 'jobs' list.
+# We use blpop (blocking left pop) with a 5-second timeout for efficient waiting.
 def main():
     """
     Main worker loop that continuously processes jobs from the Redis queue.
@@ -62,7 +68,6 @@ def main():
                 
                 print(f"[Worker] Processing Job ID: {job_id}, Prompt: '{prompt}'")
 
-                # Call Neysa Llama 3.3 API
                 try:
                     headers = {
                         "Content-Type": "application/json",
