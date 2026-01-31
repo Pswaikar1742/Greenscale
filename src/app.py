@@ -11,7 +11,7 @@ import streamlit as st
 import uuid
 import time
 import logging
-from src.dashboard_elements import display_metric_card
+from dashboard_elements import display_metric_card
 
 # Load environment variables from .env file
 load_dotenv()
