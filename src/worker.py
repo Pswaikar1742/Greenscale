@@ -7,10 +7,10 @@ When KEDA scales the Deployment to replicas: 1, this worker wakes up and begins 
 
 import os
 import time
-import json
-import uuid
 import redis
 import requests
+import json  # Import json to parse the incoming job_content
+import uuid
 from dotenv import load_dotenv
 
 # Task 1: Load environment variables from .env file
@@ -42,6 +42,8 @@ def main():
     Uses blocking pop (blpop) to avoid busy-looping and efficiently wait for tasks.
     """
     while True:
+        job_id = None  # Initialize job_id outside try-block for error handling
+        job_json_string = None  # Initialize for error handling
         try:
             # Use blpop with 5-second timeout for efficient blocking
             result = redis_client.blpop("jobs", timeout=5)
@@ -51,10 +53,21 @@ def main():
                 print("[Worker] Waiting for work...")
             else:
                 # result is a tuple: (list_name, job_content)
-                _, job_content = result
-                print(f"[Worker] Received task: {job_content}")
+                # job_content is a JSON string: {"job_id": "...", "prompt": "..."}
+                _, job_json_string = result
+                print(f"[Worker] Received raw task: {job_json_string}")
                 
-                # Call Neysa Llama 3.3 API
+                # CRITICAL FIX: Parse the JSON string to get job_id and prompt
+                job_data = json.loads(job_json_string)
+                job_id = job_data.get("job_id")
+                prompt = job_data.get("prompt")
+
+                if not job_id or not prompt:
+                    print(f"[Worker] ERROR: Invalid job format received. Skipping. Data: {job_json_string}")
+                    continue  # Skip to next loop iteration
+                
+                print(f"[Worker] Processing Job ID: {job_id}, Prompt: '{prompt}'")
+
                 try:
                     headers = {
                         "Content-Type": "application/json",
@@ -64,9 +77,10 @@ def main():
                     payload = {
                         "model": "meta-llama/Llama-3.3-70B-Instruct",
                         "messages": [
-                            {"role": "user", "content": job_content}
+                            {"role": "user", "content": prompt}  # CRITICAL FIX: Use the extracted 'prompt'
                         ],
-                        "temperature": 0.7
+                        "temperature": 0.7,
+                        "max_tokens": 200  # Limit response size for performance
                     }
                     
                     response = requests.post(NEYSA_API_URL, headers=headers, json=payload, timeout=60)
@@ -75,13 +89,26 @@ def main():
                     # Extract and print the response
                     result_json = response.json()
                     assistant_message = result_json["choices"][0]["message"]["content"]
-                    print(f"[Worker] Llama Response: {assistant_message}")
+                    print(f"[Worker] Llama Response for Job ID {job_id}: {assistant_message}")
                     
+                    # Save the result back to Redis
+                    redis_client.set(f"result:{job_id}", assistant_message, ex=300)  # Save with job_id for frontend
+                    print(f"[Worker] Result saved for Job ID {job_id}.")
+
                 except requests.exceptions.RequestException as e:
-                    print(f"[Worker] Error calling Neysa API: {str(e)}")
+                    error_message = f"Error calling Neysa API: {str(e)}"
+                    print(f"[Worker] {error_message}")
+                    if job_id:  # Only save error if we have a job_id
+                        redis_client.set(f"result:{job_id}", error_message, ex=300)
                 except (KeyError, IndexError) as e:
-                    print(f"[Worker] Error parsing API response: {str(e)}")
+                    error_message = f"Error parsing API response: {str(e)}. Response: {response.text if 'response' in locals() else 'No response'}"
+                    print(f"[Worker] {error_message}")
+                    if job_id:
+                        redis_client.set(f"result:{job_id}", error_message, ex=300)
         
+        except json.JSONDecodeError as e:
+            print(f"[Worker] ERROR: Failed to parse Redis job content as JSON: {str(e)}. Raw content: {job_json_string}")
+            # Do not save result for malformed jobs
         except redis.ConnectionError as e:
             print(f"[Worker] Redis connection error: {str(e)}")
             print("[Worker] Attempting to reconnect in 5 seconds...")
