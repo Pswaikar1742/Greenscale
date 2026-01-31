@@ -1,38 +1,33 @@
 """
 GreenScale Worker
 As per INSTRUCTIONS.md, this script runs inside a Docker container deployed via Kubernetes.
-It connects to Redis, watches the 'jobs' list, and processes each job using the OpenAI API.
+It connects to Redis, watches the 'jobs' list, and processes each job using the Neysa Llama API.
 When KEDA scales the Deployment to replicas: 1, this worker wakes up and begins processing.
 """
 
 import os
 import time
 import redis
-from openai import OpenAI
+import requests
 from dotenv import load_dotenv
 
 # Task 1: Load environment variables from .env file
-# As per INSTRUCTIONS.md, secrets are managed via .env (OPENAI_API_KEY, REDIS_HOST, REDIS_PORT)
+# As per INSTRUCTIONS.md, secrets are managed via .env
 load_dotenv()
 
 # Load configuration from environment variables
-OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
+NEYSA_API_URL = os.getenv("NEYSA_API_URL", "https://boomai-llama.neysa.io/v1/chat/completions")
+NEYSA_API_KEY = os.getenv("NEYSA_API_KEY", "2d0c490f-c41a-ff22-eb7d-4445372c574d")
 REDIS_HOST = os.getenv("REDIS_HOST", "redis-service")  # Default to Kubernetes Redis service name
 REDIS_PORT = int(os.getenv("REDIS_PORT", 6379))
-
-# Validate required secrets
-if not OPENAI_API_KEY:
-    raise ValueError("OPENAI_API_KEY not found in environment variables. Please set it in .env or as an environment variable.")
 
 # Initialize Redis client
 # As per INSTRUCTIONS.md, worker pulls jobs from the 'jobs' list in Redis
 redis_client = redis.Redis(host=REDIS_HOST, port=REDIS_PORT, decode_responses=True)
 
-# Initialize OpenAI client
-openai_client = OpenAI(api_key=OPENAI_API_KEY)
-
 print(f"[Worker] Initialized successfully.")
 print(f"[Worker] Redis: {REDIS_HOST}:{REDIS_PORT}")
+print(f"[Worker] Using Neysa Llama 3.3 endpoint: {NEYSA_API_URL}")
 print(f"[Worker] Listening for jobs on 'jobs' list...")
 
 
@@ -57,22 +52,33 @@ def main():
                 _, job_content = result
                 print(f"[Worker] Received task: {job_content}")
                 
-                # Call OpenAI Chat Completions API
+                # Call Neysa Llama 3.3 API
                 try:
-                    response = openai_client.chat.completions.create(
-                        model="gpt-3.5-turbo",
-                        messages=[
+                    headers = {
+                        "Content-Type": "application/json",
+                        "Authorization": f"Bearer {NEYSA_API_KEY}"
+                    }
+                    
+                    payload = {
+                        "model": "meta-llama/Llama-3.3-70B-Instruct",
+                        "messages": [
                             {"role": "user", "content": job_content}
                         ],
-                        temperature=0.7,
-                    )
+                        "temperature": 0.7
+                    }
+                    
+                    response = requests.post(NEYSA_API_URL, headers=headers, json=payload, timeout=60)
+                    response.raise_for_status()
                     
                     # Extract and print the response
-                    assistant_message = response.choices[0].message.content
-                    print(f"[Worker] OpenAI Response: {assistant_message}")
+                    result_json = response.json()
+                    assistant_message = result_json["choices"][0]["message"]["content"]
+                    print(f"[Worker] Llama Response: {assistant_message}")
                     
-                except Exception as e:
-                    print(f"[Worker] Error calling OpenAI API: {str(e)}")
+                except requests.exceptions.RequestException as e:
+                    print(f"[Worker] Error calling Neysa API: {str(e)}")
+                except (KeyError, IndexError) as e:
+                    print(f"[Worker] Error parsing API response: {str(e)}")
         
         except redis.ConnectionError as e:
             print(f"[Worker] Redis connection error: {str(e)}")

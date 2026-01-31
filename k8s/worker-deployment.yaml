@@ -27,7 +27,7 @@ spec:
       containers:
         - name: worker
           # Use local image (loaded via: minikube image load greenscale-worker:latest)
-          image: greenscale-worker:latest
+          image: greenscale-worker:v1
           imagePullPolicy: Never
           env:
             - name: OPENAI_API_KEY
