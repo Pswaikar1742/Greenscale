@@ -1,4 +1,9 @@
+import sys
 import os
+
+# Add the src directory to the Python path
+sys.path.append(os.path.dirname(os.path.abspath(__file__)))
+
 import redis
 import json
 from dotenv import load_dotenv
