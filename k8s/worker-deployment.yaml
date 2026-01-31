@@ -1,10 +1,6 @@
 # GreenScale Worker Deployment
 # Owner: P (Platform Engineer)
-# Create a Kubernetes Deployment for the 'greenscale-worker'.
-# Namespace: greenscale-system
-# Replicas: 0
-# Image: greenscale-worker:latest
-# It needs the OPENAI_API_KEY from a Kubernetes secret named 'openai-secret'.
+# Updated for Neysa Llama API with hostAliases for DNS resolution
 
 apiVersion: apps/v1
 kind: Deployment
@@ -24,17 +20,28 @@ spec:
       labels:
         app: greenscale-worker
     spec:
+      # Host alias for DNS resolution to Neysa endpoint
+      hostAliases:
+        - ip: "103.42.50.49"
+          hostnames:
+            - "boomai-llama.neysa.io"
+      
       containers:
         - name: worker
-          # Use local image (loaded via: minikube image load greenscale-worker:latest)
+          # Use local image (loaded via: minikube image load greenscale-worker:v1)
           image: greenscale-worker:v1
           imagePullPolicy: Never
           env:
-            - name: OPENAI_API_KEY
+            - name: NEYSA_API_KEY
               valueFrom:
                 secretKeyRef:
-                  name: openai-secret
-                  key: OPENAI_API_KEY
+                  name: neysa-secret
+                  key: NEYSA_API_KEY
+            - name: NEYSA_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: neysa-secret
+                  key: NEYSA_API_URL
             - name: REDIS_HOST
               value: "redis-service"
             - name: REDIS_PORT
