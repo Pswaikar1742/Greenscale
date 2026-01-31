@@ -89,7 +89,7 @@ if st.button("✅ Submit Job to Queue", use_container_width=True):
             st.success(f"✨ Job submitted successfully! Job ID: `{job_id}`")
 
             # Refresh the dashboard
-            st.experimental_rerun()
+            st.rerun()
         except Exception as e:
             st.error(f"Failed to submit job: {str(e)}")
 
@@ -110,7 +110,7 @@ if 'active_job_id' in st.session_state:
                     del st.session_state['active_job_id']
 
                     # Refresh the dashboard
-                    st.experimental_rerun()
+                    st.rerun()
                 time.sleep(1)  # Wait for 1 second before polling again
             except Exception as e:
                 st.error(f"An error occurred while polling for results: {str(e)}")
