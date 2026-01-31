@@ -1,0 +1,58 @@
+# GreenScale Worker Deployment
+# Owner: P (Platform Engineer)
+# Updated for Neysa Llama API with hostAliases for DNS resolution
+
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: greenscale-worker
+  namespace: greenscale-system
+  labels:
+    app: greenscale-worker
+spec:
+  # CRITICAL: Start at 0 replicas for Scale-to-Zero
+  replicas: 0
+  selector:
+    matchLabels:
+      app: greenscale-worker
+  template:
+    metadata:
+      labels:
+        app: greenscale-worker
+    spec:
+      # Host alias for DNS resolution to Neysa endpoint
+      hostAliases:
+        - ip: "103.42.50.49"
+          hostnames:
+            - "boomai-llama.neysa.io"
+      
+      containers:
+        - name: worker
+          # Use local image (loaded via: minikube image load greenscale-worker:v1)
+          image: greenscale-worker:v1
+          imagePullPolicy: Never
+          env:
+            - name: NEYSA_API_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: neysa-secret
+                  key: NEYSA_API_KEY
+            - name: NEYSA_API_URL
+              valueFrom:
+                secretKeyRef:
+                  name: neysa-secret
+                  key: NEYSA_API_URL
+            - name: REDIS_HOST
+              value: "redis-service"
+            - name: REDIS_PORT
+              value: "6379"
+            - name: REDIS_LIST_NAME
+              value: "jobs"
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "100m"
+            limits:
+              memory: "512Mi"
+              cpu: "500m"
+      restartPolicy: Always

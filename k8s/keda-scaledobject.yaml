@@ -1,0 +1,40 @@
+# KEDA ScaledObject for GreenScale Worker
+# Owner: P (Platform Engineer)
+# Create a KEDA ScaledObject.
+# It should scale the 'greenscale-worker' deployment.
+# Trigger type is redis.
+# The redis address is 'redis-service:6379' from the 'greenscale-system' namespace.
+# The list to monitor is 'jobs'.
+# Set cooldownPeriod to 30 seconds.
+# Minimum replicas: 0. Maximum replicas: 5.
+
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: greenscale-worker-scaler
+  namespace: greenscale-system
+spec:
+  scaleTargetRef:
+    name: greenscale-worker
+  
+  # Scale-to-Zero: Minimum replicas is 0
+  minReplicaCount: 0
+  # Maximum replicas: 5
+  maxReplicaCount: 5
+  
+  # Wait 30 seconds of inactivity before scaling down
+  cooldownPeriod: 30
+  
+  # How often to check the queue (seconds)
+  pollingInterval: 5
+
+  triggers:
+    - type: redis
+      metadata:
+        # Redis address from greenscale-system namespace
+        address: redis-service.greenscale-system.svc.cluster.local:6379
+        # The list to monitor is 'jobs'
+        listName: jobs
+        # Scale when list length > 0
+        listLength: "1"
+        enableTLS: "false"

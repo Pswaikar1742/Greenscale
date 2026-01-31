@@ -1,0 +1,36 @@
+# Docker Compose for Local Development
+# Owner: P (Platform Engineer)
+# Use this for local testing before deploying to Kubernetes
+
+version: '3.8'
+
+services:
+  # Redis for local development
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  # Worker for local testing (optional)
+  worker:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    environment:
+      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_LIST_NAME=jobs
+    depends_on:
+      redis:
+        condition: service_healthy
+
+volumes:
+  redis-data:

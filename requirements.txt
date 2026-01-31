@@ -2,18 +2,18 @@
 # Deployed across both frontend (app.py) and backend (worker.py)
 
 # UI Framework - Streamlit dashboard for user interaction
-streamlit
+streamlit>=1.28.0
 
 # Queue Connector - Redis client for job queue management
-redis
+redis>=4.5.0
 
 # AI SDK - OpenAI API for LLM inference
-openai
+openai>=1.0.0
 
 # Secrets Manager - Load environment variables from .env
-python-dotenv
+python-dotenv>=1.0.0
 
-# Data Validation & Settings Management (optional but recommended)
+# Data Validation & Settings Management
 pydantic
 
 # HTTP Client - General purpose requests library
