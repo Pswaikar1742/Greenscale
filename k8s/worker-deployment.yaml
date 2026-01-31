@@ -28,8 +28,8 @@ spec:
       
       containers:
         - name: worker
-          # Use local image (loaded via: minikube image load greenscale-worker:v1)
-          image: greenscale-worker:v1
+          # Use local image (loaded via: minikube image load greenscale-worker:v2)
+          image: greenscale-worker:v2
           imagePullPolicy: Never
           env:
             - name: NEYSA_API_KEY

@@ -20,14 +20,19 @@ services:
 
   # Worker for local testing (optional)
   worker:
-    build:
-      context: .
-      dockerfile: Dockerfile
+    image: greenscale-worker:latest
     environment:
-      - OPENAI_API_KEY=${OPENAI_API_KEY}
+      - NEYSA_API_KEY=2d0c490f-c41a-ff22-eb7d-4445372c574d
+      - NEYSA_API_URL=https://boomai-llama.neysa.io/v1/chat/completions
       - REDIS_HOST=redis
       - REDIS_PORT=6379
       - REDIS_LIST_NAME=jobs
+    deploy:
+      resources:
+        limits:
+          memory: 512M
+        reservations:
+          memory: 256M
     depends_on:
       redis:
         condition: service_healthy
