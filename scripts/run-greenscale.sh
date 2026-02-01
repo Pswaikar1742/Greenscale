@@ -227,11 +227,11 @@ kubectl create secret generic neysa-secret \
 log_success "API secret created/updated"
 
 # ============================================================================
-# Step 6: Verify Deployment
+# Step 7: Verify Deployment
 # ============================================================================
-log_ste7: Verify Deployment
-# ============================================================================
-log_step "7aiting for Redis to be ready..."
+log_step "7" "Verifying Deployment"
+
+log_info "Waiting for Redis to be ready..."
 kubectl wait --for=condition=ready pod -l app=redis -n greenscale-system --timeout=120s
 log_success "Redis is running"
 
