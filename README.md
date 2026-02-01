@@ -15,8 +15,8 @@
 
 | Resource | Link |
 |----------|------|
-| 🎥 **Demo Video** | [Watch Demo](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
-| 📊 **Live Presentation** | [View Slides](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
+| 🎥 **Demo Video** | [Watch Demo](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
+| 📊 **Live Presentation** | [View Slides](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
 | 🌐 **Hosted App** | *Run locally with one command (see below)* |
 
 > **Quick Demo:** Run `./scripts/run-greenscale.sh` and open http://localhost:8501
@@ -308,8 +308,8 @@ MIT License - Built for **AIBoomi Hackathon 2026**
 | Resource | URL |
 |----------|-----|
 | 📂 GitHub Repo | [github.com/Pswaikar1742/Greenscale](https://github.com/Pswaikar1742/Greenscale.git) |
-| 🎥 Demo Video | [Watch Demo](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
-| 📊 Presentation | [View Slides](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
+| 🎥 Demo Video | [Watch Demo](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
+| 📊 Presentation | [View Slides](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
 
 ---
 
