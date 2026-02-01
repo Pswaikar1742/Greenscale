@@ -11,19 +11,99 @@
 
 ---
 
-## 🎯 What is GreenScale?
+## � Product Demo
 
-GreenScale is an infrastructure project that enables **true Scale-to-Zero** for AI/ML workloads. When there's no work, your expensive GPU pods sleep (0 replicas). When jobs arrive, they wake up instantly.
+| Resource | Link |
+|----------|------|
+| 🎥 **Demo Video** | [Watch on YouTube](https://youtube.com/your-demo-link) |
+| 📊 **Live Presentation** | [View Slides](https://docs.google.com/presentation/your-slides-link) |
+| 🌐 **Hosted App** | *Run locally with one command (see below)* |
 
-**Key Benefits:**
-- 💰 **Cost Savings**: Pay only when processing jobs
-- ⚡ **Instant Scale-Up**: ~2 second cold start with KEDA
-- 🔄 **Automatic Scale-Down**: 30 second cooldown to zero
-- 🧠 **AI-Ready**: Integrated with Llama 3.3 70B API
+> **Quick Demo:** Run `./scripts/run-greenscale.sh` and open http://localhost:8501
 
 ---
 
-## 🏗️ Architecture
+## 🎯 Problem Statement
+
+### The $2.7 Billion Problem
+
+Organizations running AI/ML workloads on Kubernetes face a critical cost challenge:
+
+```
+┌─────────────────────────────────────────────────────────────────┐
+│                    THE IDLE GPU PROBLEM                         │
+├─────────────────────────────────────────────────────────────────┤
+│                                                                 │
+│   💰 A100 GPU Cost: $3.50/hour = $2,520/month                   │
+│   📊 Average AI Workload Utilization: Only 5-15%                │
+│   🔥 Wasted Cost: Up to $2,394/month PER GPU                    │
+│                                                                 │
+│   "GPUs sit idle 85-95% of the time, but you pay 100%"         │
+│                                                                 │
+└─────────────────────────────────────────────────────────────────┘
+```
+
+**Why does this happen?**
+- Traditional Kubernetes keeps minimum replicas running 24/7
+- Batch AI jobs are sporadic (inference requests, model training)
+- No native "scale to zero" for GPU workloads
+- Manual scaling is error-prone and slow
+
+---
+
+## 💡 Our Solution: GreenScale
+
+GreenScale is an **event-driven autoscaling platform** that enables true **Scale-to-Zero** for AI/ML workloads:
+
+| Feature | Traditional K8s | GreenScale |
+|---------|-----------------|------------|
+| Minimum Replicas | 1+ (always on) | **0** (truly off) |
+| GPU Cost at Idle | $2,520/month | **$0/month** |
+| Scale-up Time | Manual / HPA lag | **~2 seconds** |
+| Scale Trigger | CPU/Memory metrics | **Event-driven (queue)** |
+
+### How It Works
+
+```
+┌──────────────┐     ┌──────────────┐     ┌──────────────┐
+│   No Jobs    │     │  Job Arrives │     │  Processing  │
+│              │     │              │     │              │
+│  Workers: 0  │────▶│  Workers: 1  │────▶│  Workers: N  │
+│  Cost: $0    │     │  (2s cold)   │     │  (auto-scale)│
+└──────────────┘     └──────────────┘     └──────────────┘
+                                                │
+                     ┌──────────────┐           │
+                     │  Job Done    │◀──────────┘
+                     │              │   30s cooldown
+                     │  Workers: 0  │
+                     │  Cost: $0    │
+                     └──────────────┘
+```
+
+### Real-World Savings Calculator
+
+| Scenario | Traditional | GreenScale | Monthly Savings |
+|----------|-------------|------------|-----------------|
+| Dev/Test (5% util) | $2,520 | $126 | **$2,394** |
+| Staging (15% util) | $2,520 | $378 | **$2,142** |
+| Production (30% util) | $2,520 | $756 | **$1,764** |
+
+---
+
+## 🛠️ Technology Stack
+
+### Core Technologies
+
+| Layer | Technology | Purpose |
+|-------|------------|---------|
+| **Orchestration** | Kubernetes | Container orchestration |
+| **Autoscaling** | KEDA | Event-driven scale-to-zero |
+| **Message Queue** | Redis | Job queue & result storage |
+| **AI Backend** | Llama 3.3 70B (Neysa) | LLM inference API |
+| **Frontend** | Streamlit | Real-time dashboard |
+| **Containerization** | Docker | Worker containerization |
+
+### Architecture Diagram
 
 ```
 ┌─────────────────────────────────────────────────────────────────┐
@@ -35,7 +115,7 @@ GreenScale is an infrastructure project that enables **true Scale-to-Zero** for 
 │                     STREAMLIT DASHBOARD                          │
 │                         (src/app.py)                             │
 │              • Submit prompts  • View results                    │
-│              • Real-time metrics  • Job tracking                 │
+│              • Real-time metrics  • Cost tracking                │
 └─────────────────────────────────────────────────────────────────┘
                                │
                                ▼
@@ -52,11 +132,20 @@ GreenScale is an infrastructure project that enables **true Scale-to-Zero** for 
 ┌─────────────────────────┐      ┌─────────────────────────────────┐
 │         KEDA            │      │      WORKER PODS                │
 │   Event-Driven Scaler   │─────▶│     (src/worker.py)             │
-│  • Monitors Redis queue │      │  • Replicas: 0 → N              │
+│  • Monitors Redis queue │      │  • Replicas: 0 → 5              │
 │  • 30s cooldown         │      │  • Calls Llama 3.3 70B API      │
-│  • 0-5 replicas         │      │  • Stores results in Redis      │
+│  • Instant scale-up     │      │  • Stores results in Redis      │
 └─────────────────────────┘      └─────────────────────────────────┘
 ```
+
+### Key Components
+
+| Component | File | Description |
+|-----------|------|-------------|
+| Dashboard | `src/app.py` | Streamlit UI with real-time metrics |
+| Worker | `src/worker.py` | Processes jobs from Redis queue |
+| KEDA Config | `k8s/keda-scaledobject.yaml` | Scale-to-zero configuration |
+| Redis | `k8s/redis.yaml` | Message queue deployment |
 
 ---
 
@@ -73,87 +162,56 @@ greenscale/
 │   ├── worker-deployment.yaml  # Worker deployment (replicas: 0)
 │   ├── keda-scaledobject.yaml  # KEDA autoscaling config
 │   └── openai-secret.yaml  # API key secret
+├── scripts/
+│   ├── run-greenscale.sh   # ⭐ One-click deployment script
+│   └── test-queue.sh       # E2E test script
+├── docs/
+│   ├── DEPLOYMENT_GUIDE.md # Comprehensive deployment guide
+│   ├── UI_METRICS_GUIDE.md # Dashboard metrics explanation
+│   └── ...                 # Additional documentation
 ├── Dockerfile              # Worker container image
 ├── docker-compose.yaml     # Local development setup
 ├── requirements.txt        # Python dependencies
-├── .env.example            # Environment template
-└── docs/                   # Additional documentation
+└── README.md               # This file
 ```
 
 ---
 
-## 🚀 Quick Start
+## 🚀 Quick Start (One Command)
 
 ### Prerequisites
 
-- **Docker** (for building images)
-- **Minikube** (local Kubernetes cluster)
-- **kubectl** (Kubernetes CLI)
-- **KEDA** (installed on cluster)
-- **Neysa API Key** (for Llama 3.3 70B)
+- **Docker** (v20.10+)
+- **Minikube** (v1.30+)
+- **kubectl** (v1.27+)
+- **Python** (3.9+)
 
-### 1️⃣ Start Minikube
-
-```bash
-minikube start --driver=docker --memory=4096
-```
-
-### 2️⃣ Install KEDA
+### One-Click Deployment
 
 ```bash
-helm repo add kedacore https://kedacore.github.io/charts
-helm repo update
-helm install keda kedacore/keda --namespace keda --create-namespace
+# Clone the repository
+git clone https://github.com/your-username/greenscale.git
+cd greenscale
+
+# Run everything with one command!
+./scripts/run-greenscale.sh
 ```
 
-### 3️⃣ Build & Load Docker Image
+This script automatically:
+1. ✅ Starts Minikube cluster
+2. ✅ Installs KEDA autoscaler
+3. ✅ Builds Docker image
+4. ✅ Deploys all Kubernetes resources
+5. ✅ Sets up Redis port-forwarding
+6. ✅ Launches Streamlit dashboard
 
-```bash
-# Build the worker image
-docker build -t greenscale-worker:latest .
+**Open http://localhost:8501** and start submitting AI jobs! 🎉
 
-# Load into Minikube
-minikube image load greenscale-worker:latest
-```
-
-### 4️⃣ Configure Secrets
-
-Edit `k8s/openai-secret.yaml` with your API key (base64 encoded):
-
-```bash
-echo -n "your-api-key" | base64
-```
-
-### 5️⃣ Deploy to Kubernetes
-
-```bash
-# Apply all manifests
-kubectl apply -f k8s/namespace.yaml
-kubectl apply -f k8s/openai-secret.yaml
-kubectl apply -f k8s/redis.yaml
-kubectl apply -f k8s/worker-deployment.yaml
-kubectl apply -f k8s/keda-scaledobject.yaml
-
-# Verify deployment
-kubectl get pods -n greenscale-system
-```
-
-### 6️⃣ Run Frontend (Port Forward Redis)
-
-```bash
-# Terminal 1: Port forward Redis
-kubectl port-forward svc/redis-service -n greenscale-system 6379:6379
-
-# Terminal 2: Run Streamlit
-pip install -r requirements.txt
-streamlit run src/app.py
-```
-
-Open http://localhost:8501 🎉
+> 📚 For detailed setup options, see [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
 
 ---
 
-## 🧪 Testing Scale-to-Zero
+## 🧪 See Scale-to-Zero in Action
 
 ### Watch the magic happen:
 
@@ -161,18 +219,21 @@ Open http://localhost:8501 🎉
 # Terminal 1: Watch pods (should show 0 worker pods initially)
 kubectl get pods -n greenscale-system -w
 
-# Terminal 2: Submit a job
+# Terminal 2: Submit a job via dashboard or CLI
 kubectl exec -n greenscale-system deployment/redis -- \
   redis-cli LPUSH jobs '{"job_id":"test-001","prompt":"What is 2+2?"}'
 
 # Watch Terminal 1: Worker scales 0→1, processes job, then 1→0 after 30s
 ```
 
-### Check result:
-
-```bash
-kubectl exec -n greenscale-system deployment/redis -- \
-  redis-cli GET result:test-001
+**Expected behavior:**
+```
+NAME                                 READY   STATUS    
+redis-xxxxxxxxxx-xxxxx               1/1     Running   
+greenscale-worker-xxxxxxxxxx-xxxxx   0/1     Pending   ← Job arrives
+greenscale-worker-xxxxxxxxxx-xxxxx   1/1     Running   ← Processing
+greenscale-worker-xxxxxxxxxx-xxxxx   0/1     Terminating ← 30s cooldown
+(no worker pods)                                       ← Scale-to-Zero!
 ```
 
 ---
@@ -200,52 +261,18 @@ kubectl exec -n greenscale-system deployment/redis -- \
 
 ---
 
-## 🔧 Development
+## 📊 Dashboard Features
 
-### Local Development with Docker Compose
+The Streamlit dashboard provides real-time visibility:
 
-```bash
-# Start Redis locally
-docker-compose up -d redis
+| Metric | Description |
+|--------|-------------|
+| 📥 **Queue** | Jobs waiting in Redis |
+| ⚡ **Workers** | Active worker pods (0-5) |
+| ✅ **Processed** | Total completed jobs |
+| 💰 **Savings** | Estimated cost savings |
 
-# Run worker locally (for testing)
-export REDIS_HOST=localhost
-python src/worker.py
-
-# Run frontend
-streamlit run src/app.py
-```
-
-### Rebuild After Changes
-
-```bash
-docker build --no-cache -t greenscale-worker:latest .
-minikube image load greenscale-worker:latest
-kubectl rollout restart deployment/greenscale-worker -n greenscale-system
-```
-
----
-
-## 📊 Monitoring
-
-### Check KEDA Status
-
-```bash
-kubectl get scaledobject -n greenscale-system
-kubectl describe scaledobject greenscale-worker-scaler -n greenscale-system
-```
-
-### View Worker Logs
-
-```bash
-kubectl logs -n greenscale-system -l app=greenscale-worker -f
-```
-
-### Redis Queue Status
-
-```bash
-kubectl exec -n greenscale-system deployment/redis -- redis-cli LLEN jobs
-```
+> 📚 For detailed metrics explanation, see [docs/UI_METRICS_GUIDE.md](docs/UI_METRICS_GUIDE.md)
 
 ---
 
@@ -253,17 +280,20 @@ kubectl exec -n greenscale-system deployment/redis -- redis-cli LLEN jobs
 
 | Issue | Solution |
 |-------|----------|
-| Worker shows "Error" after termination | This is normal - KEDA terminates pods gracefully |
 | Worker not scaling up | Check KEDA: `kubectl get scaledobject -n greenscale-system` |
-| Redis connection failed | Verify Redis is running: `kubectl get pods -n greenscale-system` |
-| API errors | Check secret is correct and API endpoint is reachable |
+| Redis connection failed | Ensure port-forward is running |
+| API errors | Verify API key in secret |
+
+> 📚 For more issues, see [docs/DEPLOYMENT_GUIDE.md#troubleshooting](docs/DEPLOYMENT_GUIDE.md#troubleshooting)
 
 ---
 
 ## 👥 Team
 
-- **Prathmesh (P)** - Platform Engineer: Kubernetes, Docker, Infrastructure
-- **Ali (A)** - Application Engineer: Python, Redis, Streamlit UI
+| Member | Role | Responsibilities |
+|--------|------|------------------|
+| **Prathmesh (P)** | Platform Engineer | Kubernetes, Docker, KEDA, Infrastructure |
+| **Ali (A)** | Application Engineer | Python, Redis, Streamlit UI |
 
 ---
 
@@ -273,6 +303,19 @@ MIT License - Built for **AIBoomi Hackathon 2026**
 
 ---
 
+## 🔗 Links
+
+| Resource | URL |
+|----------|-----|
+| 📂 GitHub Repo | [github.com/your-username/greenscale](https://github.com/your-username/greenscale) |
+| 🎥 Demo Video | [Watch Demo](https://youtube.com/your-demo-link) |
+| 📊 Presentation | [View Slides](https://docs.google.com/presentation/your-slides-link) |
+| 📚 Documentation | [docs/](docs/) |
+
+---
+
 <p align="center">
   <b>🌱 GreenScale - Because idle GPUs shouldn't cost you money</b>
+  <br><br>
+  <i>Built with ❤️ for AIBoomi Hackathon 2026</i>
 </p>

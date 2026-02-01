@@ -525,8 +525,11 @@ col1, col2, col3, col4, col5 = st.columns(5)
 
 # Calculate actual average response time from job history
 if st.session_state.job_history:
-    response_times = [job.get('response_time', 3) for job in st.session_state.job_history]
-    avg_response = f"{sum(response_times) / len(response_times):.1f}s"
+    response_times = [job.get('response_time', 3) for job in st.session_state.job_history if 'response_time' in job]
+    if response_times:
+        avg_response = f"{sum(response_times) / len(response_times):.1f}s"
+    else:
+        avg_response = "~3s"
 else:
     avg_response = "~3s"
 
@@ -534,7 +537,7 @@ metrics = [
     ("🕐", "Uptime", f"{int((time.time() - st.session_state.session_start) / 60)}m", "emerald"),
     ("⏱️", "Avg Response", avg_response, "blue"),
     ("📊", "Scale Events", str(jobs_processed), "purple"),
-    ("💾", "Memory", "256MB" if active_workers == 0 else "512MB", "cyan"),
+    ("💾", "Memory", "0MB" if active_workers == 0 else "256MB", "cyan"),
     ("🔥", "GPU Util", "0%" if active_workers == 0 else "78%", "amber"),
 ]
 
@@ -662,9 +665,6 @@ if 'active_job_id' in st.session_state and redis_connected:
             'timestamp': datetime.now().strftime("%H:%M:%S"),
             'response_time': response_time
         })
-        
-        # Update savings (more jobs = more demonstrated value)
-        st.session_state.total_savings += 0.15  # Add savings per job
         
         # Keep only last 10
         st.session_state.job_history = st.session_state.job_history[:10]
