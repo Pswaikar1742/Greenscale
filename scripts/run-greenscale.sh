@@ -242,11 +242,11 @@ log_info "KEDA ScaledObject status:"
 kubectl get scaledobject -n greenscale-system
 
 # ============================================================================
-# Step 7: Start Port Forward (Background)
+# Step 8: Start Port Forward (Background)
 # ============================================================================
-log_ste8: Start Port Forward (Background)
-# ============================================================================
-log_step "8existing port-forward on 6379
+log_step "8" "Starting Redis Port Forward"
+
+# Kill any existing port-forward on 6379
 pkill -f "kubectl port-forward.*6379:6379" 2>/dev/null || true
 sleep 1
 
