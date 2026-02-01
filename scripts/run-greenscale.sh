@@ -97,9 +97,56 @@ cd "$PROJECT_ROOT"
 log_info "Working directory: $PROJECT_ROOT"
 
 # ============================================================================
-# Step 0: Check Prerequisites
+# Step 0: Setup Environment File
 # ============================================================================
-log_step "0" "Checking Prerequisites"
+log_step "0" "Setting Up Environment Configuration"
+
+if [ ! -f "$PROJECT_ROOT/.env" ]; then
+    log_warning ".env file not found. Creating from template..."
+    
+    if [ -f "$PROJECT_ROOT/.env.example" ]; then
+        cp "$PROJECT_ROOT/.env.example" "$PROJECT_ROOT/.env"
+        log_success ".env file created from .env.example"
+    else
+        log_info "Creating new .env file..."
+        cat > "$PROJECT_ROOT/.env" << 'EOF'
+# Redis Configuration
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# Neysa AI API Configuration
+NEYSA_API_URL=https://boomai-llama.neysa.io/v1/chat/completions
+NEYSA_API_KEY=your-api-key-here
+EOF
+        log_success ".env file created"
+    fi
+    
+    echo ""
+    log_info "Please enter your Neysa API Key (or press Enter to use default for testing):"
+    read -p "API Key: " user_api_key
+    
+    if [ -n "$user_api_key" ]; then
+        # Replace the API key in .env file
+        if [[ "$OSTYPE" == "darwin"* ]]; then
+            # macOS
+            sed -i '' "s|NEYSA_API_KEY=.*|NEYSA_API_KEY=$user_api_key|" "$PROJECT_ROOT/.env"
+        else
+            # Linux
+            sed -i "s|NEYSA_API_KEY=.*|NEYSA_API_KEY=$user_api_key|" "$PROJECT_ROOT/.env"
+        fi
+        log_success "API key configured in .env file"
+    else
+        log_warning "Using default API key (may have rate limits)"
+    fi
+    echo ""
+else
+    log_success ".env file already exists"
+fi
+
+# ============================================================================
+# Step 1: Check Prerequisites
+# ============================================================================
+log_step "1" "Checking Prerequisites"
 
 check_command docker
 check_command minikube
@@ -108,9 +155,9 @@ check_command python3
 check_command pip
 
 # ============================================================================
-# Step 1: Start Minikube
+# Step 2: Start Minikube
 # ============================================================================
-log_step "1" "Starting Minikube Cluster"
+log_step "2" "Starting Minikube Cluster"
 
 if minikube status | grep -q "Running"; then
     log_success "Minikube is already running"
@@ -121,9 +168,9 @@ else
 fi
 
 # ============================================================================
-# Step 2: Install KEDA
+# Step 3: Install KEDA
 # ============================================================================
-log_step "2" "Installing KEDA (Event-Driven Autoscaler)"
+log_step "3" "Installing KEDA (Event-Driven Autoscaler)"
 
 if kubectl get namespace keda &> /dev/null; then
     log_success "KEDA namespace exists"
@@ -139,9 +186,9 @@ kubectl wait --for=condition=ready pod -l app=keda-operator -n keda --timeout=18
 log_success "KEDA is ready"
 
 # ============================================================================
-# Step 3: Build Docker Image
+# Step 4: Build Docker Image
 # ============================================================================
-log_step "3" "Building Worker Docker Image"
+log_step "4" "Building Worker Docker Image"
 
 log_info "Building greenscale-worker:latest..."
 docker build -t greenscale-worker:latest "$PROJECT_ROOT"
@@ -152,27 +199,25 @@ minikube image load greenscale-worker:latest
 log_success "Image loaded into Minikube"
 
 # ============================================================================
-# Step 4: Deploy Kubernetes Resources
+# Step 5: Deploy Kubernetes Resources
 # ============================================================================
-log_step "4" "Deploying Kubernetes Resources"
+log_step "5" "Deploying Kubernetes Resources"
 
 log_info "Applying K8s manifests from k8s/ directory..."
 kubectl apply -f "$PROJECT_ROOT/k8s/"
 log_success "K8s resources deployed"
 
 # ============================================================================
-# Step 5: Create API Secret
+# Step 6: Create API Secret
 # ============================================================================
-log_step "5" "Creating Neysa API Secret"
+log_step "6" "Creating Neysa API Secret"
 
-# Check if .env file exists and source it
-if [ -f "$PROJECT_ROOT/.env" ]; then
-    source "$PROJECT_ROOT/.env"
-    log_info "Loaded environment from .env file"
-fi
+# Load environment from .env file
+source "$PROJECT_ROOT/.env"
+log_info "Loaded environment from .env file"
 
-# Use environment variable or default
-NEYSA_API_KEY="${NEYSA_API_KEY:-2d0c490f-c41a-ff22-eb7d-4445372c574d}"
+# Use environment variable or fallback
+NEYSA_API_KEY="${NEYSA_API_KEY}"
 NEYSA_API_URL="${NEYSA_API_URL:-https://boomai-llama.neysa.io/v1/chat/completions}"
 
 kubectl create secret generic neysa-secret \
@@ -184,9 +229,9 @@ log_success "API secret created/updated"
 # ============================================================================
 # Step 6: Verify Deployment
 # ============================================================================
-log_step "6" "Verifying Deployment"
-
-log_info "Waiting for Redis to be ready..."
+log_ste7: Verify Deployment
+# ============================================================================
+log_step "7aiting for Redis to be ready..."
 kubectl wait --for=condition=ready pod -l app=redis -n greenscale-system --timeout=120s
 log_success "Redis is running"
 
@@ -199,9 +244,9 @@ kubectl get scaledobject -n greenscale-system
 # ============================================================================
 # Step 7: Start Port Forward (Background)
 # ============================================================================
-log_step "7" "Starting Redis Port Forward"
-
-# Kill any existing port-forward on 6379
+log_ste8: Start Port Forward (Background)
+# ============================================================================
+log_step "8existing port-forward on 6379
 pkill -f "kubectl port-forward.*6379:6379" 2>/dev/null || true
 sleep 1
 
@@ -222,18 +267,18 @@ fi
 # ============================================================================
 # Step 8: Install Python Dependencies
 # ============================================================================
-log_step "8" "Installing Python Dependencies"
-
-log_info "Installing requirements..."
+log_ste9: Install Python Dependencies
+# ============================================================================
+log_step "9nstalling requirements..."
 pip install -r "$PROJECT_ROOT/requirements.txt" --quiet
 log_success "Python dependencies installed"
 
 # ============================================================================
 # Step 9: Launch Streamlit Dashboard
 # ============================================================================
-log_step "9" "Launching Streamlit Dashboard"
-
-echo -e "\n${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+log_ste10: Launch Streamlit Dashboard
+# ============================================================================
+log_step "10${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                                                               ║${NC}"
 echo -e "${GREEN}║   🚀 GreenScale is Ready!                                     ║${NC}"
 echo -e "${GREEN}║                                                               ║${NC}"
