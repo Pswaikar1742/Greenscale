@@ -207,7 +207,7 @@ This script automatically:
 
 **Open http://localhost:8501** and start submitting AI jobs! 🎉
 
-> 📚 For detailed setup options, see [docs/DEPLOYMENT_GUIDE.md](docs/DEPLOYMENT_GUIDE.md)
+
 
 ---
 
@@ -272,7 +272,7 @@ The Streamlit dashboard provides real-time visibility:
 | ✅ **Processed** | Total completed jobs |
 | 💰 **Savings** | Estimated cost savings |
 
-> 📚 For detailed metrics explanation, see [docs/UI_METRICS_GUIDE.md](docs/UI_METRICS_GUIDE.md)
+
 
 ---
 
@@ -284,7 +284,7 @@ The Streamlit dashboard provides real-time visibility:
 | Redis connection failed | Ensure port-forward is running |
 | API errors | Verify API key in secret |
 
-> 📚 For more issues, see [docs/DEPLOYMENT_GUIDE.md#troubleshooting](docs/DEPLOYMENT_GUIDE.md#troubleshooting)
+
 
 ---
 
@@ -297,9 +297,6 @@ The Streamlit dashboard provides real-time visibility:
 
 ---
 
-## 📜 License
-
-MIT License - Built for **AIBoomi Hackathon 2026**
 
 ---
 
@@ -315,6 +312,4 @@ MIT License - Built for **AIBoomi Hackathon 2026**
 
 <p align="center">
   <b>🌱 GreenScale - Because idle GPUs shouldn't cost you money</b>
-  <br><br>
-  <i>Built with ❤️ for AIBoomi Hackathon 2026</i>
 </p>
