@@ -265,20 +265,20 @@ else
 fi
 
 # ============================================================================
-# Step 8: Install Python Dependencies
+# Step 9: Install Python Dependencies
 # ============================================================================
-log_ste9: Install Python Dependencies
-# ============================================================================
-log_step "9nstalling requirements..."
+log_step "9" "Installing Python Dependencies"
+
+log_info "Installing requirements..."
 pip install -r "$PROJECT_ROOT/requirements.txt" --quiet
 log_success "Python dependencies installed"
 
 # ============================================================================
-# Step 9: Launch Streamlit Dashboard
+# Step 10: Launch Streamlit Dashboard
 # ============================================================================
-log_ste10: Launch Streamlit Dashboard
-# ============================================================================
-log_step "10${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
+log_step "10" "Launching Streamlit Dashboard"
+
+echo -e "${GREEN}╔═══════════════════════════════════════════════════════════════╗${NC}"
 echo -e "${GREEN}║                                                               ║${NC}"
 echo -e "${GREEN}║   🚀 GreenScale is Ready!                                     ║${NC}"
 echo -e "${GREEN}║                                                               ║${NC}"

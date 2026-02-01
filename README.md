@@ -11,12 +11,12 @@
 
 ---
 
-## � Product Demo
+## 🎬 Product Demo
 
 | Resource | Link |
 |----------|------|
-| 🎥 **Demo Video** | [Watch on YouTube](https://youtube.com/your-demo-link) |
-| 📊 **Live Presentation** | [View Slides](https://docs.google.com/presentation/your-slides-link) |
+| 🎥 **Demo Video** | [Watch Demo](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
+| 📊 **Live Presentation** | [View Slides](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
 | 🌐 **Hosted App** | *Run locally with one command (see below)* |
 
 > **Quick Demo:** Run `./scripts/run-greenscale.sh` and open http://localhost:8501
@@ -190,8 +190,8 @@ greenscale/
 
 ```bash
 # Clone the repository
-git clone https://github.com/your-username/greenscale.git
-cd greenscale
+git clone https://github.com/Pswaikar1742/Greenscale.git
+cd Greenscale
 
 # Run everything with one command!
 ./scripts/run-greenscale.sh
@@ -307,10 +307,9 @@ MIT License - Built for **AIBoomi Hackathon 2026**
 
 | Resource | URL |
 |----------|-----|
-| 📂 GitHub Repo | [github.com/your-username/greenscale](https://github.com/your-username/greenscale) |
-| 🎥 Demo Video | [Watch Demo](https://youtube.com/your-demo-link) |
-| 📊 Presentation | [View Slides](https://docs.google.com/presentation/your-slides-link) |
-| 📚 Documentation | [docs/](docs/) |
+| 📂 GitHub Repo | [github.com/Pswaikar1742/Greenscale](https://github.com/Pswaikar1742/Greenscale.git) |
+| 🎥 Demo Video | [Watch Demo](https://drive.google.com/file/d/1iT0e_xwR-3lJLyux35Hz4fF4ixFNuKZ2/view?usp=sharing) |
+| 📊 Presentation | [View Slides](https://drive.google.com/file/d/12IZwp1OVbmJUocjHKuo9kEB3Bkq5FRvj/view?usp=drive_link) |
 
 ---
 
