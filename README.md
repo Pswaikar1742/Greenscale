@@ -284,8 +284,6 @@ The Streamlit dashboard provides real-time visibility:
 | Redis connection failed | Ensure port-forward is running |
 | API errors | Verify API key in secret |
 
-
-
 ---
 
 ## 👥 Team

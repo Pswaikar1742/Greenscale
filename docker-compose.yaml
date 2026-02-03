@@ -22,7 +22,7 @@ services:
   worker:
     image: greenscale-worker:latest
     environment:
-      - NEYSA_API_KEY=2d0c490f-c41a-ff22-eb7d-4445372c574d
+      - NEYSA_API_KEY=${NEYSA_API_KEY}
       - NEYSA_API_URL=https://boomai-llama.neysa.io/v1/chat/completions
       - REDIS_HOST=redis
       - REDIS_PORT=6379

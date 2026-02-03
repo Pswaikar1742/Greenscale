@@ -54,8 +54,9 @@ minikube image load greenscale-worker:latest
 kubectl apply -f k8s/
 
 # Create the Neysa API secret (if not exists)
+# Replace <REPLACE_WITH_NEYSA_API_KEY> with your real key (do not commit keys).
 kubectl create secret generic neysa-secret \
-  --from-literal=NEYSA_API_KEY=2d0c490f-c41a-ff22-eb7d-4445372c574d \
+  --from-literal=NEYSA_API_KEY=<REPLACE_WITH_NEYSA_API_KEY> \
   --from-literal=NEYSA_API_URL=https://boomai-llama.neysa.io/v1/chat/completions \
   -n greenscale-system --dry-run=client -o yaml | kubectl apply -f -
 ```
@@ -171,8 +172,8 @@ Greenscale/
 For local development without Kubernetes:
 
 ```bash
-# Set environment variables
-export NEYSA_API_KEY=2d0c490f-c41a-ff22-eb7d-4445372c574d
+# Set environment variables (replace placeholder with your key)
+export NEYSA_API_KEY=<REPLACE_WITH_NEYSA_API_KEY>
 export NEYSA_API_URL=https://boomai-llama.neysa.io/v1/chat/completions
 
 # Start all services
